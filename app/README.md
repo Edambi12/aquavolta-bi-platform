@@ -2,6 +2,8 @@
 
 Source code of the Lovable.dev project **`aquavolta-solution`**, retrieved from Lovable at commit `0d0962faefd968c2019cbeb055c5e8d46a0538af`.
 
+Published by Lovable at <https://aquavolta-solution.lovable.app>.
+
 The application presents the company's three service departments (electricity, fluids, civil engineering), lets clients create an account and submit quote requests, and embeds the published Power BI report.
 
 ## Stack
@@ -66,36 +68,17 @@ To use your own project, apply the migrations with the Supabase CLI and enable t
 | `.gitignore` | `.env` rules appended |
 | `README.md` | Lovable boilerplate replaced by this file |
 | `bun.lockb` | Not retrieved (binary); `package-lock.json` is the lockfile of record |
-| Images in `src/assets/` and `public/favicon.ico` | See below |
+| Images in `src/assets/` and `public/favicon.ico` | Retrieved from the published site (see below) |
 
 ## Binary assets
 
-The application imports 23 images from `src/assets/` (logo, hero image and service photos) and uses `public/favicon.ico`. The Lovable connector used for the retrieval returns file contents as text, which corrupts binary files, so these files could not be transferred through it.
-
-**If `src/assets/` is absent from this folder, the build fails on the missing imports.** To complete the application, export the project from Lovable (GitHub sync or ZIP download) and copy `src/assets/*` and `public/favicon.ico` here.
-
-Expected files:
-
-```text
-src/assets/aquavolta-logo.png          src/assets/hero-aquavolte.jpg
-src/assets/electricite-service.jpg     src/assets/fluides-service.jpg
-src/assets/genie-civil-service.jpg
-src/assets/elec-installation-industrielle.jpg   src/assets/elec-maintenance.jpg
-src/assets/elec-solaire.jpg            src/assets/elec-domotique.jpg
-src/assets/elec-eclairage-led.jpg      src/assets/elec-tableaux.jpg
-src/assets/fluid-plomberie-cvc.jpg     src/assets/fluid-sprinklers.jpg
-src/assets/fluid-traitement-eaux.jpg   src/assets/fluid-gaz.jpg
-src/assets/fluid-climatisation.jpg     src/assets/fluid-pompage.jpg
-src/assets/civil-maconnerie.jpg        src/assets/civil-terrassement.jpg
-src/assets/civil-vrd.jpg               src/assets/civil-renovation.jpg
-src/assets/civil-amenagement.jpg       src/assets/civil-batiment.jpg
-public/favicon.ico
-```
+The 23 images in `src/assets/` and `public/favicon.ico` could not be transferred through the Lovable connector, which returns file contents as text. They were downloaded instead from the project's published site (`aquavolta-solution.lovable.app`) and restored under their original file names. A local production build of this folder produces the same content-hashed file name for each of the 23 images, and for the CSS bundle, as the published site, which confirms that the files are identical.
 
 ## Verification status
 
 - `npx tsc --noEmit -p tsconfig.app.json`: passes.
-- `npm run build`: succeeds when the image files are present.
+- `npm run build`: succeeds.
+- Production build exercised in a headless browser: the public routes (`/`, the three department pages, `/auth` and the not-found page) render, service images load, `/dashboard` redirects unauthenticated visitors to `/auth`, the quote form opens, the Dashboard dialog embeds the Power BI URL, and the mobile layout has no horizontal overflow. Sign-up, sign-in and request submission were not exercised, as they need a live Supabase project.
 - `npm run lint`: reports style findings in the generated code (mainly `no-explicit-any`, one empty interface, one `require()` in `tailwind.config.ts`); none blocks the build.
 
 ## Content notice

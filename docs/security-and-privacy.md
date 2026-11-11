@@ -33,6 +33,7 @@ Published:
 | Talend archive | `talend.project` holds a user entry with a password hash | Not committed |
 | Lovable project `.env` | Supabase URL and publishable (anon) key | Not committed; `app/.env.example` with placeholders provided |
 | Lovable project source | Supabase project reference in `app/supabase/config.toml` and in `app/SUPABASE_AUTH_GUIDE.md` | Kept: a project reference is an identifier, not a credential, and is visible to every visitor of the deployed app |
+| Application images and screenshots | Service photos, logo and three captures of public marketing pages; no financial data | Committed |
 | Git history | One prior commit containing only a placeholder README | Nothing to remediate |
 
 A pattern scan of the staged files (JWT-like strings, private-key headers, password assignments, spreadsheet/dump/pbix extensions) is part of the pre-commit review.

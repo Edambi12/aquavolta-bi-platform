@@ -4,6 +4,8 @@
 
 **Live Power BI dashboard:** [open the published report](https://app.powerbi.com/view?r=eyJrIjoiZWNjNjk5YWQtYThlOC00YmQwLWExNWYtZGQxMzkzMDEzOTYyIiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9)
 
+**Live web application:** <https://aquavolta-solution.lovable.app> (hosted by Lovable)
+
 > **Predictive analytics status:** `Planned — Future Development Phase`. No forecasting model has been trained and no prediction result is published in this repository. See the [roadmap](docs/roadmap.md).
 
 ---
@@ -208,7 +210,13 @@ The `.pbix` file is not published because it embeds an imported copy of the data
 
 ## 12. Screenshots
 
-No screenshot is committed yet: dashboard screenshots would display real company figures and must first be reviewed or captured from anonymised data. The [`screenshots/`](screenshots/) folder is reserved for approved captures.
+Web application (captured from a local production build):
+
+| Landing page | Service catalogue | Sign-in |
+|---|---|---|
+| ![Landing page](screenshots/app-home.png) | ![Fluids department page](screenshots/app-fluides.png) | ![Sign-in page](screenshots/app-auth.png) |
+
+No Power BI screenshot is committed: the report displays real company figures, so captures must first be reviewed or taken from anonymised data. The live report is available through the link in [section 11](#11-power-bi-dashboard).
 
 ## 13. Installation and execution
 
@@ -280,7 +288,6 @@ Audit details and the access-control requirements of the specification: [docs/se
 ## 17. Known limitations
 
 - **Talend Jobs are not in the repository** — only the project name and version are known from the supplied archive.
-- **Frontend image assets are documented in `app/README.md`** — see the note there on binary assets.
 - Most monetary columns are stored as `VARCHAR(255)` in both databases; numeric typing is handled downstream.
 - `fact_tabel` has no primary key and, in the supplied export, holds far fewer rows than the `*_d` tables; the Power BI visuals reference the `*_d` tables directly.
 - `date_d` holds a single `DATE` column; year/quarter/month come from Power BI date hierarchies.
@@ -313,7 +320,7 @@ aquavolta-bi-platform/
 ├── powerbi/
 │   └── README.md
 ├── docs/                    # architecture, requirements, dictionary, pipeline, KPIs, security, roadmap
-├── screenshots/
+├── screenshots/             # web application captures
 ├── .env.example
 ├── .gitignore
 └── README.md
