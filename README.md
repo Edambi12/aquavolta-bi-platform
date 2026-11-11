@@ -1,8 +1,12 @@
 # AQUAVOLTA SOLUTION — Dynamic Financial Analysis & Business Intelligence Platform
 
+[![CI](https://github.com/Edambi12/aquavolta-bi-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Edambi12/aquavolta-bi-platform/actions/workflows/ci.yml)
+
 > AQUAVOLTA SOLUTION is an end-to-end Business Intelligence platform for dynamic financial analysis. It combines Python-based data exploration, Talend ETL, a MySQL Staging Area and Data Warehouse, Power BI dashboards, and a Lovable-generated web application to support financial monitoring and profitability analysis.
 
 **Live Power BI dashboard:** [open the published report](https://app.powerbi.com/view?r=eyJrIjoiZWNjNjk5YWQtYThlOC00YmQwLWExNWYtZGQxMzkzMDEzOTYyIiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9)
+
+> **Confidentiality notice.** That link is a Power BI *Publish to web* link: it needs no sign-in and anyone who has the URL can view the report, which is built on real company data. Keeping the `.pbix` file out of this repository does **not** make the published report private. The warehouse table it reads also contains a confirmed calculation error, so its 2023 export collection figures are expected to be overstated (see [calculation audit](analytics/calculation-audit.md)). Recommendations: [docs/security-and-privacy.md](docs/security-and-privacy.md#power-bi-publication).
 
 **Live web application:** <https://aquavolta-solution.lovable.app> (hosted by Lovable)
 
@@ -40,7 +44,7 @@ This repository documents a real academic/professional BI project built on two y
 
 The work spans the full decision-support chain: source workbooks are explored and cleaned in Python, integrated with Talend into a MySQL staging database, modelled in a MySQL data warehouse, and analysed in a four-page Power BI report. A React web application generated with Lovable.dev presents the company's services and embeds the published Power BI report.
 
-Because the underlying data is confidential, **this public repository contains code, structure and documentation only** — no source workbook, no data row and no Power BI file. See [Security and data privacy](#15-security-and-data-privacy).
+Because the underlying data is confidential, **this repository contains code, structure and documentation only** — no source workbook, no data row and no Power BI file. The published Power BI report is a separate exposure: it is public and shows figures derived from the real data. See [Security and data privacy](#15-security-and-data-privacy).
 
 ## 2. Business context and objectives
 
@@ -54,10 +58,12 @@ Analysis scope: revenue (local/export, by country, client, department, 2022 vs 2
 
 ## 3. Main features
 
-- **Data quality workflow in Python** — profiling, missing-value analysis, duplicate checks, outlier detection, date normalisation and imputation across four notebooks.
+- **Data quality workflow in Python** — profiling, missing-value analysis, duplicate checks, outlier detection, date normalisation and imputation across four notebooks, with a shared, unit-tested helper module.
+- **Calculation audit** — a documented review of the financial logic, one confirmed and corrected error, and SQL data-quality controls.
 - **Two-layer MySQL storage** — a staging database (`datasa`, 16 tables) and a data warehouse (`data_war_house`, 9 tables) with a central fact table linked by eight foreign keys.
 - **Power BI report** — four pages (*Accueil*, *Produit*, *Charge*, *Résultat*) with slicers, cards, gauges, a map and time-series visuals, published to the web.
 - **Web application** — React + TypeScript single-page app with Supabase authentication, service-request forms, and the Power BI report embedded in a full-screen dialog.
+- **Continuous integration** — GitHub Actions type-checks, lints and builds the application and validates the notebooks on every push and pull request.
 
 ## 4. Technology stack
 
@@ -129,16 +135,18 @@ Step-by-step detail: [docs/data-pipeline.md](docs/data-pipeline.md).
 
 ## 7. Python exploration and cleaning
 
-Four notebooks in [`analytics/notebooks/`](analytics/notebooks/) (outputs stripped, paths made portable):
+Four notebooks in [`analytics/notebooks/`](analytics/notebooks/), published without outputs. Paths, loading and the shared financial helpers live in `aquavolta_helpers.py`.
 
-| Notebook | Scope | Techniques actually implemented |
+| Notebook | Scope | Techniques implemented |
 |---|---|---|
 | `2022.ipynb` | Export, local, expenses, payroll 2022 | `info`/`describe` profiling, `missingno` bar charts, box plot, IQR and z-score outlier detection, duplicate count, log-transform histogram, mode imputation of client name, date formatting, department label harmonisation |
-| `2023.ipynb` | Export, local, expenses, payroll 2023 | Client-level collection-ratio imputation, custom date repair function, recomputation of TVA (19 %) and TTC, mode imputation, date formatting, label harmonisation |
-| `encaissement.ipynb` | Collections | Mode imputation (bank), **`IterativeImputer` with `BayesianRidge`** on numeric columns, date repair |
-| `looktest.ipynb` | Detailed expenses | `missingno` matrix/bar/dendrogram/heatmap, missing-value table, row drop on missing invoice number, mean imputation (HT), VAT-rate correction to legal rates (7/13/19 %), **`SimpleImputer(most_frequent)`**, TTC and net-of-withholding recomputation |
+| `2023.ipynb` | Export, local, expenses, payroll 2023 | Client-ratio imputation of missing collections (**corrected**, see below), accounting-identity control, date repair function, recomputation of TVA (19 %) and TTC, mode imputation, label harmonisation |
+| `encaissement.ipynb` | Collections | Mode imputation (bank), `IterativeImputer` with `BayesianRidge` on numeric columns, date repair |
+| `looktest.ipynb` | Detailed expenses | `missingno` matrix/bar/dendrogram/heatmap, missing-value table, row drop on missing invoice number, mean imputation (HT), VAT-rate correction to legal rates, `SimpleImputer(most_frequent)`, TTC and net-of-withholding recomputation |
 
-`KNNImputer` and `IsolationForest` are imported but **not applied** in the current notebooks. Methodology and caveats: [analytics/README.md](analytics/README.md).
+**Calculation audit.** A review of the financial logic is documented in [analytics/calculation-audit.md](analytics/calculation-audit.md). Its main result: the 2023 export notebook multiplied revenue by a collection rate expressed in percent instead of a ratio, so two imputed collections were about a hundred times too large. The notebook is corrected; the loaded data and the published report are not until the pipeline is re-run. Five other calculations are flagged for a business decision and left unchanged.
+
+`KNNImputer` and median imputation, required by the specification, are not applied. Methodology: [analytics/README.md](analytics/README.md).
 
 ## 8. Talend ETL
 
@@ -194,6 +202,8 @@ erDiagram
 ```
 
 The implemented warehouse is a **star-shaped schema with one central fact table**, which differs from the model in the specification (three fact tables `F_CA`, `F_Dépenses`, `F_Salaires` and dimensions `Dim_Clients`, `Dim_Projets`, `Dim_Fournisseurs`, `Dim_Temps`, `Dim_Pays`). Clients, suppliers and countries are currently attributes of the `*_d` tables rather than separate dimensions. The differences are listed in [database/README.md](database/README.md).
+
+**Proposed evolution.** An architecture review and a target star schema (four fact tables with explicit grain, conformed dimensions, typed measures, a full date dimension) are documented in [docs/dwh-target-model.md](docs/dwh-target-model.md), with a migration roadmap that leaves the current warehouse and Power BI report untouched. The proposal is not deployed.
 
 ## 11. Power BI dashboard
 
@@ -262,42 +272,70 @@ This creates empty structures. Loading them requires the confidential workbooks 
 
 ## 15. Security and data privacy
 
-- No source workbook, SQL data row, Power BI file, salary, client, supplier or employee record is committed.
-- SQL scripts are structure-only; notebooks are stripped of every output; two client names hard-coded in notebook cells were replaced with placeholders.
-- No `.env` file or credential is committed; `.env.example` holds placeholders only.
-- A strict [`.gitignore`](.gitignore) blocks spreadsheets, dumps, `.pbix` files, archives and secrets.
+**In this repository**
 
-Audit details and the access-control requirements of the specification: [docs/security-and-privacy.md](docs/security-and-privacy.md).
+- No source workbook, SQL data row, Power BI file, salary, client, supplier or employee record is committed.
+- SQL scripts are structure-only; notebooks carry no output; hard-coded client names were removed from the notebook code.
+- No `.env` file or credential is committed; `.env.example` holds placeholders only. CI uses placeholder values and no secret.
+- A strict [`.gitignore`](.gitignore) blocks spreadsheets, dumps, `.pbix` files, archives and secrets, and CI rejects notebooks that contain outputs or local paths.
+
+**Outside this repository — open risk**
+
+- The Power BI report is shared through a public *Publish to web* link. It requires no authentication, it is embedded in the public web application for every visitor (signed in or not), and it presents figures computed from the real data. This is not a private channel.
+- The access-control requirements of the specification (separate finance / management / HR accounts, restricted payroll data, import/export traceability) are not implemented.
+
+Audit details and the recommended target — an anonymised portfolio report, an authenticated report for company users, and optionally Power BI Embedded: [docs/security-and-privacy.md](docs/security-and-privacy.md).
 
 ## 16. Implemented vs. planned features
 
 | Area | Status |
 |---|---|
 | Data collection and exploration (Python) | Implemented |
-| Cleaning and imputation (Python: mode, mean, `SimpleImputer`, `IterativeImputer`) | Implemented |
-| `KNNImputer`-based cleaning (required by the specification) | Not applied yet (imported only) |
+| Cleaning and imputation (mode, mean, `SimpleImputer`, `IterativeImputer`) | Implemented |
+| Calculation audit, helper module, unit tests | Implemented (phase 2) |
+| `KNNImputer` and median imputation (required by the specification) | Not implemented |
 | Staging Area (MySQL `datasa`) | Implemented |
-| Data Warehouse (MySQL `data_war_house`) | Implemented — simplified single-fact model |
-| Dedicated client / supplier / country / project dimensions | Planned |
+| Data Warehouse (MySQL `data_war_house`) | Implemented — single-fact model |
+| Target star schema with dedicated client / supplier / country / project dimensions | Proposed, not deployed |
+| SQL data-quality controls | Implemented (read-only script); not yet scheduled in the load |
 | Power BI report (4 pages) and public publication | Implemented |
+| Anonymised portfolio report, authenticated company report | Recommended, not implemented |
 | Web application with authentication and dashboard embed | Implemented |
-| Role-based access to sensitive data (finance / management / HR) | Planned |
-| KPI thresholds, alerts and simulation | Planned |
+| Continuous integration (GitHub Actions) | Implemented (phase 2) |
+| Talend Jobs in version control | Not available |
+| Role-based access to sensitive data (finance / management / HR) | Not implemented |
+| KPI historisation, thresholds, alerts, simulation | Not implemented |
+| Export traceability | Not implemented |
 | Predictive analytics (financial flows, FX losses) | **Planned — Future Development Phase** |
 
 ## 17. Known limitations
 
+- **Loaded data still contains a confirmed error.** The staging and warehouse exports examined hold the two inflated 2023 export collections; the published report reads them. The notebook is fixed, the data is not.
+- **Five calculations await a business decision** (client-name imputation, regression-imputed payments, uniform 19 % VAT on local 2023 invoices, VAT forced to 19 % on detailed expenses, treatment of unpaid invoices). See the [calculation audit](analytics/calculation-audit.md).
+- **The notebooks were not re-executed on the real workbooks**, which were not available; they were validated statically, by unit tests, and by a run on throwaway synthetic files.
 - **Talend Jobs are not in the repository** — only the project name and version are known from the supplied archive.
-- Most monetary columns are stored as `VARCHAR(255)` in both databases; numeric typing is handled downstream.
-- `fact_tabel` has no primary key and, in the supplied export, holds far fewer rows than the `*_d` tables; the Power BI visuals reference the `*_d` tables directly.
+- **The published Power BI link is public**, and the report's DAX measures are not documented.
+- Most monetary columns are stored as `VARCHAR(255)` in both databases.
+- `fact_tabel` has no primary key and no defined grain; in the supplied export it holds far fewer rows than the `*_d` tables, and no Power BI visual uses it.
 - `date_d` holds a single `DATE` column; year/quarter/month come from Power BI date hierarchies.
-- There is no project identifier in the source data, so the *per-project* KPIs of the specification can only be approximated by client, department or business deal (`AFFAIRE`).
-- The published Power BI link is a public "Publish to web" link: anyone holding the URL can view the report.
-- The frontend linter reports style errors in generated code (mostly `no-explicit-any`); type-checking and the production build succeed.
+- There is no project identifier in the source data, so the *per-project* KPIs of the specification cannot be computed.
+- The frontend linter reports 8 `react-refresh/only-export-components` warnings in generated UI components; they affect hot reload during development only and were left as generated.
+- Sign-up, sign-in and request submission were not tested end to end (they need a live Supabase project).
 
 ## 18. Roadmap
 
-See [docs/roadmap.md](docs/roadmap.md). Headline items: export and version the Talend Jobs, refine the dimensional model, add role-based security, then deliver the predictive phase (time-series forecasting of financial flows and of foreign-exchange losses).
+See [docs/roadmap.md](docs/roadmap.md). Headline items: reload the corrected 2023 export data and settle the open calculation findings, replace the public report by an anonymised one, export and version the Talend Jobs, migrate to the target star schema, add role-based security, then deliver the predictive phase (time-series forecasting of financial flows and of foreign-exchange losses), which remains `Planned — Future Development Phase`.
+
+## Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and on pull requests.
+
+| Job | Steps |
+|---|---|
+| Frontend | Node.js 22, `npm ci` in `app/` with npm cache, `npm run typecheck`, `npm run lint`, `npm run build` |
+| Analytics | Python 3.12, static notebook validation (JSON, syntax, no outputs, no shell commands, no local paths), `pytest` on the helper module |
+
+The build uses placeholder Supabase values defined in the workflow; no secret is configured or required. Neither job needs the confidential workbooks.
 
 ## 19. Repository structure
 
@@ -307,8 +345,11 @@ aquavolta-bi-platform/
 │   ├── src/                 # pages, components, hooks, Supabase client
 │   └── supabase/            # Supabase config and SQL migrations
 ├── analytics/
-│   ├── notebooks/           # 4 sanitized Jupyter notebooks
-│   ├── requirements.txt
+│   ├── notebooks/           # 4 notebooks + aquavolta_helpers.py
+│   ├── tests/               # unit tests (synthetic fixtures)
+│   ├── tools/               # static notebook validator
+│   ├── calculation-audit.md # financial calculation audit
+│   ├── requirements.txt, requirements-dev.txt
 │   └── README.md
 ├── etl/
 │   ├── talend/              # reserved for exported Talend Jobs
@@ -316,10 +357,13 @@ aquavolta-bi-platform/
 ├── database/
 │   ├── staging/             # datasa_schema.sql (structure only)
 │   ├── warehouse/           # data_war_house_schema.sql (structure only)
+│   ├── checks/              # read-only data-quality controls
+│   ├── proposal/            # PROPOSED target star schema (not deployed)
 │   └── README.md
 ├── powerbi/
 │   └── README.md
-├── docs/                    # architecture, requirements, dictionary, pipeline, KPIs, security, roadmap
+├── .github/workflows/       # CI
+├── docs/                    # architecture, requirements, dictionary, pipeline, KPIs, DWH target model, security, roadmap
 ├── screenshots/             # web application captures
 ├── .env.example
 ├── .gitignore

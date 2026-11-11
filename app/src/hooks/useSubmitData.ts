@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { getErrorMessage } from '@/lib/errors';
+import type { Json } from '@/integrations/supabase/types';
 
 interface SubmitDataParams {
   departement: string;
-  data: Record<string, any>;
+  data: Record<string, Json>;
 }
 
 export const useSubmitData = () => {
@@ -60,13 +62,14 @@ export const useSubmitData = () => {
       });
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: error.message || 'Une erreur est survenue lors de l\'envoi de la demande.',
+        description: message || 'Une erreur est survenue lors de l\'envoi de la demande.',
       });
-      return { success: false, error: error.message };
+      return { success: false, error: message };
     } finally {
       setIsSubmitting(false);
     }

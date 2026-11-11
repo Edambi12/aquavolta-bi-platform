@@ -1,11 +1,11 @@
-# Libraries imported by the notebooks in analytics/notebooks/
-pandas
+# Runtime dependencies of the notebooks in analytics/notebooks/.
+# Install with:  pip install -r analytics/requirements.txt
+# Last validated on Python 3.13 with pandas 3.0, scikit-learn 1.9 (smoke run on synthetic fixtures).
+pandas>=2.0
 numpy
 matplotlib
 seaborn
 missingno
-scipy
-scikit-learn
-python-dateutil
+scikit-learn>=1.3
 openpyxl
 jupyter

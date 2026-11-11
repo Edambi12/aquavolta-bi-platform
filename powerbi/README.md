@@ -37,6 +37,16 @@ Only the names are listed. Their DAX definitions are stored in the compressed da
 2. In Power BI Desktop, connect to MySQL (requires the MySQL Connector/NET driver) and select the tables above.
 3. Recreate the measures and pages, or open the original `.pbix` and repoint the data source.
 
-## Publication note
+## Confidentiality of the published report
 
-The link above is a **Publish to web** link: it requires no sign-in and is viewable by anyone who has the URL. See `docs/security-and-privacy.md`.
+The link above is a **Publish to web** link. It requires no sign-in, can be opened and re-shared by anyone who has the URL, and is embedded in the public web application. The report is built on real company data, so its cards and charts disclose real aggregated figures, and slicers allow those aggregates to be narrowed. Not publishing the `.pbix` file does not change this.
+
+In addition, the warehouse table the report reads (`export_d`) contains the confirmed 2023 export collection error (`analytics/calculation-audit.md`, F1), so the report's 2023 export collection figures are expected to be overstated. The published report itself could not be opened from the audit environment to confirm what it displays.
+
+Recommended target, detailed in [docs/security-and-privacy.md](../docs/security-and-privacy.md#power-bi-publication):
+
+1. **Portfolio report** — same pages on an anonymised or synthetic dataset, labelled as such; this is the one to publish publicly.
+2. **Company report** — real data in a Power BI workspace with Microsoft Entra sign-in, row-level security by role, and no public embed code.
+3. **Power BI Embedded** — only if the report must appear inside the web application for authenticated users.
+
+The link is kept here because it is the project's delivered dashboard; removing or replacing it is the owner's decision.

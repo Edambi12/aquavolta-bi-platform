@@ -64,11 +64,38 @@ The web application and the BI chain are **decoupled**: the application does not
 | `/dashboard` | Authenticated | User profile |
 | `/data-view` | Authenticated | The user's submitted service requests |
 
+## Quality and delivery tooling (phase 2)
+
+| Element | Location | Role |
+|---|---|---|
+| Helper module | `analytics/notebooks/aquavolta_helpers.py` | Paths, workbook I/O with explicit errors, safe ratio, client-ratio imputation, identity control |
+| Unit tests | `analytics/tests/` | Behaviour of the helpers on synthetic fixtures |
+| Notebook validator | `analytics/tools/validate_notebooks.py` | Rejects outputs, shell commands, local paths, syntax errors |
+| Data-quality controls | `database/checks/data_quality_checks.sql` | Read-only checks on the current warehouse |
+| CI | `.github/workflows/ci.yml` | Frontend type-check, lint, build; notebook validation and tests |
+
+## Current limitations and target architecture
+
+The warehouse layer is the weakest part of the chain: the central fact table has no grain and is not used by the report, reporting tables carry no integrity constraint, and amounts are stored as text. The data-access layer is the second: the report is distributed through a public link.
+
+```mermaid
+flowchart LR
+    subgraph Now["Current"]
+        A1[("data_war_house<br/>fact_tabel + *_d tables")] --> B1["Power BI report<br/>Publish to web (public)"]
+    end
+    subgraph Target["Proposed — not deployed"]
+        A2[("Star schema<br/>4 facts, conformed dimensions")] --> B2["Company report<br/>authenticated workspace + RLS"]
+        A3[("Anonymised dataset")] --> B3["Portfolio report<br/>public"]
+    end
+```
+
+Details: [dwh-target-model.md](dwh-target-model.md) and [security-and-privacy.md](security-and-privacy.md).
+
 ## Extension point for predictive analytics
 
 Predictive analytics is `Planned — Future Development Phase`. The intended integration keeps the current chain unchanged:
 
-1. Python reads history from the warehouse (`export_d`, `local_d`, `depense_d`, `salaire_d`, `encaissement_d`).
+1. Python reads history from the warehouse (`export_d`, `local_d`, `depense_d`, `salaire_d`, `encaissement_d`, or the facts of the target model once migrated), after the data corrections of the calculation audit.
 2. Models write forecasts to **new, dedicated tables** (for example `forecast_flux`, `forecast_perte_change`) with model name, training date and horizon.
 3. Power BI adds a forecast page reading those tables, visually separated from actuals.
 

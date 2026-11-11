@@ -39,7 +39,7 @@ const Dashboard = () => {
 
         if (error) throw error;
         setProfile(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           variant: "destructive",
           title: "Erreur",

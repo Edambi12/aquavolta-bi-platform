@@ -10,6 +10,7 @@ import {
   CreditCard, Shield, UserCircle, UserPlus, AlertCircle, ArrowLeft
 } from 'lucide-react';
 import aquavoltaLogo from '@/assets/aquavolta-logo.png';
+import { getErrorMessage } from '@/lib/errors';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -125,8 +126,8 @@ const AuthPage = () => {
           navigate('/');
         }, 100);
       }
-    } catch (error: any) {
-      let errorMessage = error.message || "Une erreur est survenue.";
+    } catch (error: unknown) {
+      let errorMessage = getErrorMessage(error) || "Une erreur est survenue.";
       
       if (errorMessage.includes('Password should be at least')) {
         errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
@@ -153,11 +154,11 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message || "Impossible de se connecter avec ce fournisseur.",
+        description: getErrorMessage(error) || "Impossible de se connecter avec ce fournisseur.",
       });
     } finally {
       setLoading(false);

@@ -27,7 +27,7 @@ Published:
 | `datasa` SQL dump | 16 tables with data rows, including payroll per employee | All `INSERT` statements removed; verified that no data line remains |
 | `data_war_house` SQL dump | 9 tables with data rows | Same |
 | 4 notebooks | 146 saved outputs showing rows of real data and charts | All outputs and execution counts removed |
-| `2023.ipynb` | Two real client names hard-coded as filters | Replaced with `CLIENT_A` / `CLIENT_B` |
+| `2023.ipynb` | Two real client names hard-coded as filters | Removed: rows are now selected by condition, so no client name appears in the code |
 | Notebooks | Absolute Windows paths | Replaced with configurable relative paths |
 | `visualisation.pbix` | Imported data model inside the file | Not committed; only page and field names documented |
 | Talend archive | `talend.project` holds a user entry with a password hash | Not committed |
@@ -38,6 +38,8 @@ Published:
 
 A pattern scan of the staged files (JWT-like strings, private-key headers, password assignments, spreadsheet/dump/pbix extensions) is part of the pre-commit review.
 
+**Second audit phase.** The calculation audit was carried out on the confidential files locally; its report states impacts as ratios and row counts, with no amount and no client name. CI validates on every push that notebooks contain no output, no shell command and no local path. The CI workflow declares `contents: read` permissions, uses placeholder configuration values, and needs no repository secret. Unit-test and smoke-test fixtures are synthetic and labelled as such.
+
 ## Notes on the web application
 
 - The Supabase **publishable (anon) key** is designed to be shipped to browsers; data protection relies on Row Level Security. RLS is enabled on `profiles`, `departements` and `donnees_utilisateur`, with owner-only policies on user data.
@@ -45,13 +47,34 @@ A pattern scan of the staged files (JWT-like strings, private-key headers, passw
 - Testimonials, statistics, certifications and contact details displayed on the marketing pages are generated placeholder content, not verified company facts.
 - If a `.env` file has ever been pushed to another remote, rotate the key in the Supabase dashboard.
 
-## Exposure outside this repository
+## Power BI publication
 
-**The Power BI report is shared through "Publish to web".** That mechanism creates an unauthenticated public URL: anyone with the link can view the report and its underlying aggregated figures, and the link is embedded in a public web page. For confidential financial data this is the main residual risk of the solution. Options:
+**Current situation.** The report is distributed through *Publish to web*. This must be stated plainly:
 
-1. Replace the dataset behind the public report with anonymised or synthetic data.
-2. Share the real report only through authenticated Power BI workspaces or Power BI Embedded.
-3. Disable the public embed code when the demonstration period ends.
+- The URL is unauthenticated. Anyone who obtains it can open the report; it can be forwarded, indexed or embedded elsewhere.
+- The web application embeds it behind a *Dashboard* button that every visitor sees, signed in or not. The application's login protects user profiles and service requests, **not** the report.
+- The report is built on the real warehouse. Cards, charts and slicers disclose real aggregates (revenue, expenses, payroll cost, collections, FX losses) by period, country and department; small categories can reveal individual clients or suppliers.
+- Excluding the `.pbix` file and the data rows from GitHub protects the *repository*. It does not protect the *report*.
+- Microsoft documents *Publish to web* as intended for public information only, and tenant administrators can disable it.
+
+The link is still documented in this repository because it is the project's delivered dashboard. It was not removed or altered during the audit; doing so is the owner's decision, to be taken with the company that owns the data.
+
+**Recommended target**
+
+| | 1 — Portfolio report | 2 — Company report | 3 — Power BI Embedded (optional) |
+|---|---|---|---|
+| Audience | Recruiters, public | Finance, management, HR of the company | Authenticated users of the web application |
+| Data | Anonymised or synthetic | Real | Real |
+| Access | Public link | Power BI workspace or app, Microsoft Entra sign-in | Embed token issued by a backend after login |
+| Row-level security | Not needed | Roles per function; payroll restricted to HR | Effective identity passed with the embed token |
+| Licence | Free / Pro to publish | Pro per user, or Premium / Fabric capacity | Embedded (A) or Fabric (F) capacity |
+| Effort | Low | Low to medium | High: service principal, token endpoint, capacity cost |
+
+1. **Anonymised portfolio report.** Duplicate the `.pbix`, point it at a dataset in which client, supplier, employee and bank names are replaced by stable pseudonyms and amounts are either synthetic or scaled by an undisclosed factor with noise; keep dates and structure so every visual still works. Remove unused tables from the model, check that no real label survives in slicers, titles, tooltips or the map, label the report "Demonstration data", publish it, and replace the URL in `README.md`, `powerbi/README.md` and `app/src/components/Header.tsx`. Scaling alone is weak protection when a third party knows one true figure; pseudonymised names plus synthetic amounts is the safer option for a public portfolio.
+2. **Authenticated company report.** Publish the real report to a workspace, share it through a Power BI app or direct access to named users or security groups, define RLS roles (finance, management, HR), apply sensitivity labels if available, and **delete the existing embed code** (Power BI service → Settings → Manage embed codes) so the public URL stops working.
+3. **Power BI Embedded.** Appropriate only if real-data reports must appear inside the web application. It needs a server-side component holding a service principal secret to request embed tokens — for example a Supabase Edge Function — and a capacity. A secret of that kind must never be placed in a `VITE_*` variable. For a portfolio project, option 1 in the public site and option 2 for the company cover the need at far lower cost.
+
+**Interim measures** if the public link is kept for a demonstration period: obtain the data owner's explicit agreement, remove or aggregate payroll visuals, and set a date to delete the embed code.
 
 ## Requirements from the specification
 

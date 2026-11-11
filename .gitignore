@@ -18,6 +18,8 @@ DataSet.zip
 *.sql
 !database/staging/*_schema.sql
 !database/warehouse/*_schema.sql
+!database/proposal/*.sql
+!database/checks/*.sql
 !app/supabase/migrations/*.sql
 *.sql.gz
 *.dump
@@ -56,6 +58,7 @@ pnpm-debug.log*
 
 # --- Python / Jupyter -------------------------------------------------------
 __pycache__/
+.pytest_cache/
 *.py[cod]
 .ipynb_checkpoints/
 .venv/

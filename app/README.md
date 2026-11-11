@@ -40,6 +40,7 @@ npm run dev              # http://localhost:8080
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve the production build |
 | `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript type-check (application and Vite config) |
 
 ## Environment variables
 
@@ -76,10 +77,16 @@ The 23 images in `src/assets/` and `public/favicon.ico` could not be transferred
 
 ## Verification status
 
-- `npx tsc --noEmit -p tsconfig.app.json`: passes.
+- `npm run typecheck`: passes.
 - `npm run build`: succeeds.
 - Production build exercised in a headless browser: the public routes (`/`, the three department pages, `/auth` and the not-found page) render, service images load, `/dashboard` redirects unauthenticated visitors to `/auth`, the quote form opens, the Dashboard dialog embeds the Power BI URL, and the mobile layout has no horizontal overflow. Sign-up, sign-in and request submission were not exercised, as they need a live Supabase project.
-- `npm run lint`: reports style findings in the generated code (mainly `no-explicit-any`, one empty interface, one `require()` in `tailwind.config.ts`); none blocks the build.
+- `npm run lint`: 0 errors, 8 warnings. The 11 errors of the generated code were fixed in the second audit phase (typed `catch` blocks through `src/lib/errors.ts`, two empty interfaces turned into type aliases, an ES import in `tailwind.config.ts`, a typed cast and a stable `useCallback` in `DataView`). The remaining warnings are `react-refresh/only-export-components` in generated UI components and concern hot reload only.
+- These fixes change no markup and no style: the CSS bundle produced by the build is byte-identical to the one built before them.
+- The same three commands run in GitHub Actions on every push and pull request.
+
+## Dashboard confidentiality
+
+The **Dashboard** button is shown to every visitor, signed in or not, and the embedded report is a public *Publish to web* link. The application therefore provides no access control over the report. See `docs/security-and-privacy.md` before using it with real data.
 
 ## Content notice
 

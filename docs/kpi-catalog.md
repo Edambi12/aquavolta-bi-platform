@@ -4,6 +4,22 @@ KPIs are listed as defined in the specification, with the warehouse columns that
 
 Notation: amounts in TND unless stated. Column references use `table.column`.
 
+## Reliability of the underlying data
+
+The calculation audit ([analytics/calculation-audit.md](../analytics/calculation-audit.md)) affects several KPIs. Until the corrected data is reloaded and the open findings are settled, read them with the following caveats.
+
+| KPI family | Affected by | Effect |
+|---|---|---|
+| Export collections, actual export collections, collection rate, result and profitability for 2023 | F1 (confirmed error in loaded data) | Strongly overstated: stored 2023 export collections are about ten times export revenue |
+| Same KPIs after correction | F2 (unpaid invoices imputed) | Depends on the business decision; about 10 % difference on 2023 export collections |
+| Revenue, outstanding balance and ranking per local client | F3 (client name imputed by mode) | Most frequent client overstated by about 11 % (2022) and 20 % (2023) |
+| Cash received, bank charges, collection delay | F4 (payments imputed by regression) | Possibly overstated; not quantified |
+| Local revenue including tax 2023, local outstanding | F5 | Three invoices inconsistent |
+| Expense VAT and TTC from the detailed expense sheet | F6 | Possibly overstated; not quantified |
+| Revenue and FX loss per country | F11 (label case) | One country split in two |
+
+A collection rate should be computed as `Σ collected / Σ revenue` (amount-weighted), not as an average of per-invoice rates (finding F10). Every ratio KPI must guard against a zero denominator (`DIVIDE()` in DAX).
+
 ## Profitability
 
 | KPI | Definition (specification) | Supporting data | Notes |

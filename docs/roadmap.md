@@ -12,23 +12,40 @@
 | Web application | Done |
 | Predictive analytics | **Planned — Future Development Phase** |
 
+## Delivered in the second audit phase
+
+- Financial calculation audit of the four notebooks; one confirmed error corrected in `2023.ipynb`.
+- Shared helper module, unit tests and a static notebook validator; shell commands removed from notebooks.
+- Read-only data-quality controls for the current warehouse.
+- Architecture review and proposed target star schema with migration roadmap.
+- Frontend lint errors fixed (11 → 0) without functional or visual change.
+- GitHub Actions CI for the frontend and the analytics code.
+
+## Immediate — data corrections
+
+1. **Decide the treatment of the two 2023 export invoices** (estimated collection vs. zero), then re-run `2023.ipynb`, reload staging and warehouse, refresh the Power BI dataset. Controls C1 and C2 must return no row.
+2. **Settle the open calculation findings** F3 to F6 and F11 with the business and adapt the notebooks accordingly.
+3. **Replace or disable the public Power BI link** (see `docs/security-and-privacy.md`).
+
 ## Short term — consolidate what exists
 
 - **Export the Talend Jobs** to `etl/talend/` with credentials and paths moved to context variables (see `etl/README.md`).
 - **Document the DAX measures** of the report in `docs/kpi-catalog.md`.
 - **Add approved screenshots** of the report and the application, captured from anonymised data.
 - **Create a synthetic demonstration dataset** matching the schemas, clearly labelled as synthetic, so the pipeline can be run end to end without confidential data.
-- **Review the points raised in `analytics/README.md`** (collection-ratio imputation, index-based fills).
+- **Run the data-quality controls after every load** and keep their output with the load log.
+- **Re-execute the notebooks on the real workbooks** and compare outputs with the loaded tables.
 - **Apply `KNNImputer` and median imputation** where relevant, to complete the cleaning methods required by the specification, and compare them with the current choices.
 
 ## Medium term — strengthen the model and governance
 
-- **Dimensional model:** introduce `Dim_Clients`, `Dim_Fournisseurs`, `Dim_Pays` and a full `Dim_Temps` (year, quarter, month); split facts into revenue, expenses and payroll as in the specification; type monetary columns as `DECIMAL`.
+- **Dimensional model:** migrate to the target star schema following the phased plan in `docs/dwh-target-model.md` (parallel run, reconciliation, compatibility views, page-by-page switch of the report).
 - **Project dimension:** define a project identifier with the business so that per-project profitability and margin become computable.
 - **Data quality:** row-count reconciliation between source, staging and warehouse; rejected-row tables; load logging.
-- **Security:** role-based access (finance, management, HR), restricted visibility of payroll data, replacement of the public report link by authenticated sharing.
+- **Security:** role-based access (finance, management, HR), restricted visibility of payroll data, an authenticated report for company users and an anonymised report for the portfolio; Power BI Embedded if the report must be served inside the web application to authenticated users.
 - **KPI steering:** historisation of KPIs, thresholds and alerts.
-- **Frontend quality:** resolve linter findings, add tests, code-split the bundle.
+- **Frontend quality:** add component and end-to-end tests, code-split the bundle, gate the dashboard entry behind authentication once the report is private.
+- **CI:** add a SQL job that creates the schemas on a MySQL service container.
 
 ## Predictive analytics — Planned — Future Development Phase
 
@@ -42,7 +59,8 @@ Nothing in this section is implemented. No model has been trained, and no accura
 
 **Preconditions**
 
-- A validated, typed warehouse with reconciled history.
+- Corrected and reconciled history: forecasting on the current 2023 export collections would learn from an error.
+- A validated, typed warehouse.
 - Agreement on forecast targets, granularity and horizon.
 - An honest assessment of data volume: two years of history gives at most 24 monthly points per series, which strongly limits model choice and the reliability of any seasonal estimate.
 

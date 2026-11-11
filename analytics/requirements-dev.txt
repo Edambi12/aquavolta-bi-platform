@@ -1,0 +1,5 @@
+# Test dependencies (unit tests of aquavolta_helpers; no workbook required).
+# Install with:  pip install -r analytics/requirements-dev.txt
+pandas>=2.0
+numpy
+pytest

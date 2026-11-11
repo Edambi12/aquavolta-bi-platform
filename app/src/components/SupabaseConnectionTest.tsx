@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/errors';
 
 /**
  * Composant de test de connexion Supabase
@@ -59,15 +60,16 @@ const SupabaseConnectionTest = () => {
         isAuthenticated: !!session
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = getErrorMessage(err);
       setResult({
         success: false,
-        message: `Erreur inattendue: ${err.message}`
+        message: `Erreur inattendue: ${message}`
       });
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: err.message,
+        description: message,
       });
     } finally {
       setTesting(false);

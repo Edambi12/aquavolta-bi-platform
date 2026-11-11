@@ -7,6 +7,13 @@ Both scripts are **structure-only**. They were derived from phpMyAdmin exports (
 | `staging/datasa_schema.sql` | `datasa` | 16 |
 | `warehouse/data_war_house_schema.sql` | `data_war_house` | 9 |
 
+Two further scripts were added in the second audit phase. Neither modifies the schemas above:
+
+| Script | Nature |
+|---|---|
+| `checks/data_quality_checks.sql` | Read-only `SELECT` controls for the **current** warehouse |
+| `proposal/target_star_schema.sql` | **Proposed** target model — not deployed, to be created in a separate database |
+
 ## Staging Area — `datasa`
 
 | Group | Tables | Notes |
@@ -67,9 +74,40 @@ The result is star-shaped (one fact, eight referenced tables), but five of those
 - No `AUTO_INCREMENT` is declared; keys are assigned by the loading process.
 - Table name `fact_tabel` and several identifiers keep their original spelling to stay consistent with the Talend Jobs and the Power BI model.
 
+## Data-quality controls
+
+`checks/data_quality_checks.sql` contains seven read-only controls on `data_war_house`. Each should return no row (C7 returns counts).
+
+| Control | Detects | Result on the supplied warehouse export |
+|---|---|---|
+| C1 | Export collection greater than the invoiced amount | 2 rows |
+| C2 | Export: `CA ≠ Recouvrement + Restant` | 2 rows (the same two) |
+| C3 | Local: `TTC ≠ RECOUVREMENT + RESTANT` | 3 rows |
+| C4 | FX loss on an invoice recorded as fully outstanding | 2 rows |
+| C5 | Expenses: `TTC ≠ HT + TVA` | 0 row |
+| C6 | Country labels differing only by letter case | 1 label |
+| C7 | Row count of `fact_tabel` vs. referenced tables | fact table far smaller |
+
+C1 and C2 are the database-side trace of the imputation error described in `analytics/calculation-audit.md` (finding F1). The schema could not prevent it: amounts are text and no constraint links collected, outstanding and invoiced amounts.
+
+## Architectural limitations of the current model
+
+- **No fact grain.** A `fact_tabel` row references an expense, a payslip, an export invoice, a local invoice and a collection at once. These events are unrelated, so the row has no business meaning and measures cannot be aggregated safely through it.
+- **Transaction tables named as dimensions.** `depense_d`, `export_d`, `local_d`, `salaire_d` and `encaissement_d` hold one row per event with measures. Reporting is done on them directly, without referential integrity.
+- **Text-typed measures**, some with decimal commas.
+- **No conformed client, supplier, country or bank dimension**; spelling variants split members.
+- **Minimal date dimension.**
+- **No lineage or load audit columns.**
+
+## Proposed target model
+
+`proposal/target_star_schema.sql` and [docs/dwh-target-model.md](../docs/dwh-target-model.md) describe a star schema with four facts (`f_ca`, `f_encaissements`, `f_depenses`, `f_salaires`), ten dimensions, typed measures, surrogate keys with unknown members, a full date dimension and imputation flags, together with a phased migration that runs beside the current warehouse. **It is a proposal: no Talend Job loads it and Power BI does not read it.**
+
 ## Validation
 
 Both scripts were executed against an empty MariaDB 10.11 instance: they run without error and create 16 and 9 tables respectively, 24 primary keys and the 8 foreign keys of `fact_tabel`, with zero rows. They were not tested on MySQL 8, which is expected to accept them (integer display widths raise deprecation warnings there). Loading data requires the confidential workbooks and the Talend Jobs.
+
+The proposal script was executed the same way in a separate empty database (14 tables, 1 view, 23 foreign keys, no error). The controls script runs without error on the empty current schema and was also run locally against the confidential export to obtain the counts above.
 
 ```bash
 mysql -u root -p -e "CREATE DATABASE datasa; CREATE DATABASE data_war_house;"
