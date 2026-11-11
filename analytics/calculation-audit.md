@@ -51,7 +51,8 @@ estimated collection = revenue × (client mean collection rate in % / 100)
 - On those two rows the stored collection is **92.3× and 99.5× the invoiced amount**.
 - These two rows account for roughly **nine tenths** of the total 2023 export collections as stored.
 - Total 2023 export collections as stored are about **9.9× the total 2023 export revenue**. With the corrected formula the ratio is about **0.90**; if the two invoices are treated as uncollected (see F2) it is about **0.81**.
-- The inflated values are present in the staging table `export2023` **and in the warehouse table `export_d`**, which the Power BI report reads. Any measure built on export collections for 2023 — collected amounts, collection rate, result, profitability — is therefore overstated in the loaded data until the pipeline is re-run.
+- The inflated values are present in the staging table `export2023` **and in the warehouse table `export_d`**, which the Power BI report reads. Any measure built on export collections for 2023 is therefore overstated in the loaded data until the pipeline is re-run.
+- **Visible in the published report.** Screenshots of the *Produit* page show collections of 15.84 M against foreign revenue of 4.00 M, and a liquidity figure of 18.91 M against a global revenue of 7.69 M. The size of the gap is consistent with the overstatement once converted to dinars.
 
 **Correction.** `2023.ipynb` now calls `impute_collection_from_client_ratio()` (in `aquavolta_helpers.py`). The methodology is unchanged — client mean of per-invoice collection ratios — but the ratio is a fraction. The original lines are kept as a commented block in the notebook. Unit tests cover the behaviour (`analytics/tests/`).
 

@@ -10,7 +10,8 @@
 | Data Warehouse (MySQL) | Done — simplified model |
 | Power BI dashboards | Done — published |
 | Web application | Done |
-| Predictive analytics | **Planned — Future Development Phase** |
+| Exploratory prediction study (`prediction/`) | Done — negative result |
+| Time-series forecasting of flows and FX losses | **Planned — Future Development Phase** |
 
 ## Delivered in the second audit phase
 
@@ -47,9 +48,11 @@
 - **Frontend quality:** add component and end-to-end tests, code-split the bundle, gate the dashboard entry behind authentication once the report is private.
 - **CI:** add a SQL job that creates the schemas on a MySQL service container.
 
-## Predictive analytics — Planned — Future Development Phase
+## Predictive analytics
 
-Nothing in this section is implemented. No model has been trained, and no accuracy figure or forecast exists.
+**Delivered — exploratory study.** `prediction/` compares Extra Trees, CatBoost, Ridge, a partial-pooling model and naive baselines for predicting an export invoice amount from country and department, under leave-one-group-out validation. Every model has a negative R² and none reliably beats the baselines. The study shows that these two predictors and 58 invoices are not enough; it produces no forecast.
+
+**Forecasting — Planned — Future Development Phase.** Nothing below is implemented. No time-series model has been trained and no forecast exists.
 
 **Objectives from the specification**
 
@@ -73,4 +76,4 @@ Nothing in this section is implemented. No model has been trained, and no accura
 5. Add a forecast page to the Power BI report, visually distinct from historical data.
 6. Have results validated by the business before they are used, as the acceptance criteria require.
 
-**Planned repository location:** `analytics/forecasting/` for notebooks and scripts; new forecast tables under `database/warehouse/`.
+**Repository location:** `prediction/` for notebooks and scripts; new forecast tables in the warehouse.

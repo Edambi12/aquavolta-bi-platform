@@ -52,7 +52,7 @@ The company provides technical electricity and fluid services. It wants decision
 | 2.5 | KPI creation | Implemented as Power BI measures |
 | 2.5 | KPI historisation | Not implemented |
 | 2.5 | Thresholds and alerts | Not implemented |
-| 2.5 | Simulation and forecasting | **Planned — Future Development Phase** |
+| 2.5 | Simulation and forecasting | Exploratory prediction study delivered (no usable predictive power); forecasting and simulation **Planned — Future Development Phase** |
 | 7 | Separate user accounts (finance, management, HR) | Not implemented |
 | 7 | Restricted rights on sensitive data | Not implemented in the BI layer |
 | 7 | Import/export traceability | Not implemented |
@@ -67,7 +67,7 @@ The company provides technical electricity and fluid services. It wants decision
 | 4 — Staging load | Upcoming | Staging database exists |
 | 5 — Data Warehouse modelling | — | Warehouse database exists |
 | 6 — BI dashboards | — | Report built and published |
-| 7 — Predictions and finalisation | — | Not started |
+| 7 — Predictions and finalisation | — | Exploratory study in `prediction/`; forecasting not started |
 
 The specification's planning reflects an earlier date; phases 4–6 have since been carried out.
 
@@ -79,7 +79,7 @@ The specification's planning reflects an earlier date; phases 4–6 have since b
 | Staging database | Delivered (structure published) |
 | Structured Data Warehouse | Delivered (structure published; simplified model) |
 | Interactive BI dashboards | Delivered (published report) |
-| Prediction | Planned |
+| Prediction | Exploratory study delivered in `prediction/`; operational forecasting planned |
 
 ## Acceptance criteria
 
@@ -89,4 +89,4 @@ The specification's planning reflects an earlier date; phases 4–6 have since b
 | KPIs computed correctly | To be validated with the business; DAX definitions not yet documented |
 | Dynamic dashboards filterable by client/project/period | Partially met (no project dimension) |
 | Sensitive data secured | Not met in the BI layer (public link); enforced in this repository |
-| Forecasts functional and validated | Not started |
+| Forecasts functional and validated | Not met: the exploratory models do not beat naive baselines; no forecast produced |

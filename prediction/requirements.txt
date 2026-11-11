@@ -1,0 +1,12 @@
+# Dependencies of prediction/prediction_ca_export.ipynb
+# Install with:  pip install -r prediction/requirements.txt
+pandas>=2.0
+numpy
+scikit-learn>=1.3
+catboost
+matplotlib
+joblib
+sqlalchemy>=2.0
+pymysql
+python-dotenv
+jupyter

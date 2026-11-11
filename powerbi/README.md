@@ -8,6 +8,15 @@ The same URL is embedded in the web application (`app/src/components/Header.tsx`
 
 A `.pbix` file in import mode contains a compressed copy of every imported table. Publishing it would publish the company's financial records. The file is excluded by `.gitignore`.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Accueil](../screenshots/powerbi-accueil.png) | ![Produit](../screenshots/powerbi-produit.png) |
+| ![Charge](../screenshots/powerbi-charge.png) | ![Résultat](../screenshots/powerbi-resultat.png) |
+
+Headline figures shown (both years, no filter): global revenue 7.69 M, global expenses 4.20 M, global result 3.49 M; result 1.98 M in 2022 and 3.29 M in 2023; revenue growth 50.2 %; 9 clients, 6 banks, 16 suppliers, 16 employees. The collection-related figures are affected by the error noted below.
+
 ## Report structure
 
 Extracted from the report layout of `visualisation.pbix` (page size 1280 × 720):
@@ -41,7 +50,7 @@ Only the names are listed. Their DAX definitions are stored in the compressed da
 
 The link above is a **Publish to web** link. It requires no sign-in, can be opened and re-shared by anyone who has the URL, and is embedded in the public web application. The report is built on real company data, so its cards and charts disclose real aggregated figures, and slicers allow those aggregates to be narrowed. Not publishing the `.pbix` file does not change this.
 
-In addition, the warehouse table the report reads (`export_d`) contains the confirmed 2023 export collection error (`analytics/calculation-audit.md`, F1), so the report's 2023 export collection figures are expected to be overstated. The published report itself could not be opened from the audit environment to confirm what it displays.
+In addition, the warehouse table the report reads (`export_d`) contains the confirmed 2023 export collection error (`analytics/calculation-audit.md`, F1), so the report's 2023 export collection figures are expected to be overstated. Screenshots supplied by the author confirm it: on the *Produit* page, collections compared with foreign revenue read 15.84 M against 4.00 M, and the liquidity card reads 18.91 M against a global revenue of 7.69 M.
 
 Recommended target, detailed in [docs/security-and-privacy.md](../docs/security-and-privacy.md#power-bi-publication):
 

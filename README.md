@@ -10,7 +10,7 @@
 
 **Live web application:** <https://aquavolta-solution.lovable.app> (hosted by Lovable)
 
-> **Predictive analytics status:** `Planned — Future Development Phase`. No forecasting model has been trained and no prediction result is published in this repository. See the [roadmap](docs/roadmap.md).
+> **Prediction status:** an exploratory machine-learning study is delivered in [`prediction/`](prediction/). Under leave-one-group-out validation no model reliably beats a naive baseline (R² < 0), so it is **not an operational forecast**. Time-series forecasting of financial flows and FX losses remains `Planned — Future Development Phase`.
 
 ---
 
@@ -52,13 +52,14 @@ Management needs to analyse profitability by department, client, year and geogra
 
 - **Centralise and make reliable** the financial data: revenue, expenses, salaries, bank flows, foreign-exchange losses.
 - **Analyse profitability dynamically** by service, client, year and geographic zone.
-- **Provide a forecasting capability** to anticipate future financial flows — *planned, not yet implemented*.
+- **Provide a forecasting capability** to anticipate future financial flows — *an exploratory study exists; forecasting itself is not yet implemented*.
 
 Analysis scope: revenue (local/export, by country, client, department, 2022 vs 2023), expenses (supplier, department, type, HT/TVA/TTC, payment method), payroll (net salary, CNSS, fiscal charges, total cost, bank), and collections (collected vs outstanding, client balances, FX losses by bank and country). Details: [docs/business-requirements.md](docs/business-requirements.md) and [docs/kpi-catalog.md](docs/kpi-catalog.md).
 
 ## 3. Main features
 
 - **Data quality workflow in Python** — profiling, missing-value analysis, duplicate checks, outlier detection, date normalisation and imputation across four notebooks, with a shared, unit-tested helper module.
+- **Exploratory prediction** — a leakage-safe model comparison on export revenue, with an honest negative result.
 - **Calculation audit** — a documented review of the financial logic, one confirmed and corrected error, and SQL data-quality controls.
 - **Two-layer MySQL storage** — a staging database (`datasa`, 16 tables) and a data warehouse (`data_war_house`, 9 tables) with a central fact table linked by eight foreign keys.
 - **Power BI report** — four pages (*Accueil*, *Produit*, *Charge*, *Résultat*) with slicers, cards, gauges, a map and time-series visuals, published to the web.
@@ -122,7 +123,7 @@ Full description: [docs/architecture.md](docs/architecture.md).
 
 ## 6. End-to-end data pipeline
 
-`Excel sources → Python exploration & cleaning → Talend ETL → MySQL Staging Area → MySQL Data Warehouse → Power BI dashboard → Web application embed`
+`Excel sources → Python exploration & cleaning → Talend ETL → MySQL Staging Area → MySQL Data Warehouse → Power BI dashboard → Web application embed`, with an exploratory prediction study reading the warehouse.
 
 | Step | Input | Output | Evidence in this repo |
 |---|---|---|---|
@@ -220,13 +221,23 @@ The `.pbix` file is not published because it embeds an imported copy of the data
 
 ## 12. Screenshots
 
-Web application (captured from a local production build):
+**Power BI report** (captures supplied by the project author; they show real company figures):
+
+| Accueil — global view | Produit — collections |
+|---|---|
+| ![Power BI — Accueil](screenshots/powerbi-accueil.png) | ![Power BI — Produit](screenshots/powerbi-produit.png) |
+
+| Charge — disbursements | Résultat — 2022 vs 2023 |
+|---|---|
+| ![Power BI — Charge](screenshots/powerbi-charge.png) | ![Power BI — Résultat](screenshots/powerbi-resultat.png) |
+
+> On the *Produit* page, the liquidity indicators exceed the revenue they are compared with (for example collections of 15.84 M against foreign revenue of 4.00 M). This is the visible effect of the collection imputation error documented in the [calculation audit](analytics/calculation-audit.md); these figures should not be relied on until the corrected data is reloaded.
+
+**Web application** (captured from a local production build):
 
 | Landing page | Service catalogue | Sign-in |
 |---|---|---|
 | ![Landing page](screenshots/app-home.png) | ![Fluids department page](screenshots/app-fluides.png) | ![Sign-in page](screenshots/app-auth.png) |
-
-No Power BI screenshot is committed: the report displays real company figures, so captures must first be reviewed or taken from anonymised data. The live report is available through the link in [section 11](#11-power-bi-dashboard).
 
 ## 13. Installation and execution
 
@@ -274,7 +285,9 @@ This creates empty structures. Loading them requires the confidential workbooks 
 
 **In this repository**
 
-- No source workbook, SQL data row, Power BI file, salary, client, supplier or employee record is committed.
+- No source workbook, SQL data row, Power BI file, salary or employee record is committed.
+- The four Power BI screenshots in `screenshots/` were added at the project author's request. They show real aggregated figures and the names of some clients, suppliers and banks; publishing them is the author's decision and should be covered by the data owner's agreement.
+- The prediction notebook keeps model metrics and charts; outputs printing rows or invoice amounts were removed, and the trained model files and `.env` are not committed.
 - SQL scripts are structure-only; notebooks carry no output; hard-coded client names were removed from the notebook code.
 - No `.env` file or credential is committed; `.env.example` holds placeholders only. CI uses placeholder values and no secret.
 - A strict [`.gitignore`](.gitignore) blocks spreadsheets, dumps, `.pbix` files, archives and secrets, and CI rejects notebooks that contain outputs or local paths.
@@ -306,7 +319,8 @@ Audit details and the recommended target — an anonymised portfolio report, an 
 | Role-based access to sensitive data (finance / management / HR) | Not implemented |
 | KPI historisation, thresholds, alerts, simulation | Not implemented |
 | Export traceability | Not implemented |
-| Predictive analytics (financial flows, FX losses) | **Planned — Future Development Phase** |
+| Exploratory prediction of export invoice revenue (`prediction/`) | Implemented — negative result, not usable as a forecast |
+| Time-series forecasting of financial flows and FX losses | **Planned — Future Development Phase** |
 
 ## 17. Known limitations
 
@@ -314,6 +328,7 @@ Audit details and the recommended target — an anonymised portfolio report, an 
 - **Five calculations await a business decision** (client-name imputation, regression-imputed payments, uniform 19 % VAT on local 2023 invoices, VAT forced to 19 % on detailed expenses, treatment of unpaid invoices). See the [calculation audit](analytics/calculation-audit.md).
 - **The notebooks were not re-executed on the real workbooks**, which were not available; they were validated statically, by unit tests, and by a run on throwaway synthetic files.
 - **Talend Jobs are not in the repository** — only the project name and version are known from the supplied archive.
+- **The prediction study has no predictive power** (R² < 0 for every model); it documents a limit of the data, not a forecasting capability.
 - **The published Power BI link is public**, and the report's DAX measures are not documented.
 - Most monetary columns are stored as `VARCHAR(255)` in both databases.
 - `fact_tabel` has no primary key and no defined grain; in the supplied export it holds far fewer rows than the `*_d` tables, and no Power BI visual uses it.
@@ -324,7 +339,7 @@ Audit details and the recommended target — an anonymised portfolio report, an 
 
 ## 18. Roadmap
 
-See [docs/roadmap.md](docs/roadmap.md). Headline items: reload the corrected 2023 export data and settle the open calculation findings, replace the public report by an anonymised one, export and version the Talend Jobs, migrate to the target star schema, add role-based security, then deliver the predictive phase (time-series forecasting of financial flows and of foreign-exchange losses), which remains `Planned — Future Development Phase`.
+See [docs/roadmap.md](docs/roadmap.md). Headline items: reload the corrected 2023 export data and settle the open calculation findings, replace the public report by an anonymised one, export and version the Talend Jobs, migrate to the target star schema, add role-based security, then deliver the forecasting phase (time-series forecasting of financial flows and of foreign-exchange losses), which remains `Planned — Future Development Phase`; the exploratory study in `prediction/` is its starting point.
 
 ## Continuous integration
 
@@ -333,7 +348,7 @@ See [docs/roadmap.md](docs/roadmap.md). Headline items: reload the corrected 202
 | Job | Steps |
 |---|---|
 | Frontend | Node.js 22, `npm ci` in `app/` with npm cache, `npm run typecheck`, `npm run lint`, `npm run build` |
-| Analytics | Python 3.12, static notebook validation (JSON, syntax, no outputs, no shell commands, no local paths), `pytest` on the helper module |
+| Analytics | Python 3.12, static notebook validation (JSON, syntax, no outputs, no shell commands, no local paths; the prediction notebook is checked with its outputs allowed), `pytest` on the helper module |
 
 The build uses placeholder Supabase values defined in the workflow; no secret is configured or required. Neither job needs the confidential workbooks.
 
@@ -360,11 +375,12 @@ aquavolta-bi-platform/
 │   ├── checks/              # read-only data-quality controls
 │   ├── proposal/            # PROPOSED target star schema (not deployed)
 │   └── README.md
+├── prediction/              # exploratory ML study: notebook, charts, README
 ├── powerbi/
 │   └── README.md
 ├── .github/workflows/       # CI
 ├── docs/                    # architecture, requirements, dictionary, pipeline, KPIs, DWH target model, security, roadmap
-├── screenshots/             # web application captures
+├── screenshots/             # Power BI report and web application captures
 ├── .env.example
 ├── .gitignore
 └── README.md

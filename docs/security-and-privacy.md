@@ -9,7 +9,8 @@ Never committed:
 - Source Excel workbooks and cleaned output workbooks.
 - SQL dumps containing `INSERT` statements.
 - Power BI `.pbix` / `.pbit` files (they embed imported data).
-- Notebook outputs.
+- Outputs of the cleaning notebooks, and any prediction output showing rows or amounts.
+- Trained model files.
 - `.env` files, keys, tokens, passwords, connection strings.
 - Talend `talend.project` and connection metadata with credentials.
 
@@ -46,6 +47,17 @@ A pattern scan of the staged files (JWT-like strings, private-key headers, passw
 - A **service-role key must never** be placed in a `VITE_*` variable or committed.
 - Testimonials, statistics, certifications and contact details displayed on the marketing pages are generated placeholder content, not verified company facts.
 - If a `.env` file has ever been pushed to another remote, rotate the key in the Supabase dashboard.
+
+## Additions of the third phase
+
+| Item | Finding | Action |
+|---|---|---|
+| Prediction folder `.env` | MySQL host, user and password | Not committed; `prediction/.env.example` with placeholders |
+| Prediction notebook outputs | Printed warehouse rows with client names and invoice amounts, per-group amount distributions, a table of individual invoices | Removed; model metrics and charts kept |
+| Model files (`.joblib`, `.cbm`) | Fitted on confidential data; tree models can store training amounts; `joblib` files can execute code on load | Not committed; ignored by `.gitignore` |
+| Power BI screenshots | Real aggregated figures; visible names of some clients, suppliers and banks | Committed **at the project author's explicit request** — see below |
+
+**Power BI screenshots.** Four captures of the report are now in `screenshots/`. Unlike the rest of this repository, they contain real business information. The author chose to publish them; the same figures are already reachable through the public report link. This remains a disclosure that the company owning the data should have agreed to, and the recommendation stands: replace them with captures of an anonymised report when one exists. Removing a file later does not remove it from Git history.
 
 ## Power BI publication
 

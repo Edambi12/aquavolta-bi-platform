@@ -37,6 +37,12 @@ talend.project
 *.rar
 *.7z
 
+# --- Model artefacts (fitted on confidential data; pickle-based) ----------
+*.joblib
+*.cbm
+*.pkl
+*.pickle
+
 # --- Secrets ----------------------------------------------------------------
 .env
 .env.*

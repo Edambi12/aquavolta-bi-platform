@@ -93,10 +93,10 @@ Details: [dwh-target-model.md](dwh-target-model.md) and [security-and-privacy.md
 
 ## Extension point for predictive analytics
 
-Predictive analytics is `Planned — Future Development Phase`. The intended integration keeps the current chain unchanged:
+An exploratory study (`prediction/`) already reads `export_d` through SQLAlchemy with credentials from a local `.env`, and writes nothing back to the warehouse; its models show no usable predictive power. Operational forecasting is `Planned — Future Development Phase`. The intended integration keeps the current chain unchanged:
 
 1. Python reads history from the warehouse (`export_d`, `local_d`, `depense_d`, `salaire_d`, `encaissement_d`, or the facts of the target model once migrated), after the data corrections of the calculation audit.
 2. Models write forecasts to **new, dedicated tables** (for example `forecast_flux`, `forecast_perte_change`) with model name, training date and horizon.
 3. Power BI adds a forecast page reading those tables, visually separated from actuals.
 
-Nothing of this exists yet; the dashed elements in the diagrams mark it as future work.
+Steps 2 and 3 do not exist yet; the dashed elements in the diagrams mark them as future work.
