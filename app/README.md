@@ -50,6 +50,8 @@ npm run dev              # http://localhost:8080
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key |
 | `VITE_SUPABASE_PROJECT_ID` | Supabase project reference |
 
+The three variables are required at build time and at `npm run dev`. If `VITE_SUPABASE_URL` is missing, the Supabase client throws on start-up and the page stays blank; this is the behaviour of the generated code and was left unchanged. Placeholder values are enough to build and to browse the public pages.
+
 ## Supabase backend
 
 Migrations in `supabase/migrations/` create:
@@ -81,7 +83,7 @@ The 23 images in `src/assets/` and `public/favicon.ico` could not be transferred
 - `npm run build`: succeeds.
 - Production build exercised in a headless browser: the public routes (`/`, the three department pages, `/auth` and the not-found page) render, service images load, `/dashboard` redirects unauthenticated visitors to `/auth`, the quote form opens, the Dashboard dialog embeds the Power BI URL, and the mobile layout has no horizontal overflow. Sign-up, sign-in and request submission were not exercised, as they need a live Supabase project.
 - `npm run lint`: 0 errors, 8 warnings. The 11 errors of the generated code were fixed in the second audit phase (typed `catch` blocks through `src/lib/errors.ts`, two empty interfaces turned into type aliases, an ES import in `tailwind.config.ts`, a typed cast and a stable `useCallback` in `DataView`). The remaining warnings are `react-refresh/only-export-components` in generated UI components and concern hot reload only.
-- These fixes change no markup and no style: the CSS bundle produced by the build is byte-identical to the one built before them.
+- These fixes change no markup and no style: the CSS bundle produced by the build is byte-identical to the one built before them. Screenshots of the service and sign-in pages taken before and after the fixes are pixel-identical, and the navigation, quote form, dashboard dialog and mobile menu were re-checked in a headless browser.
 - The same three commands run in GitHub Actions on every push and pull request.
 
 ## Dashboard confidentiality
