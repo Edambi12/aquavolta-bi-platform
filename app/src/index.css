@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AQUAVOLTE Design System - Professional Engineering Services Platform
+All colors MUST be HSL. Inspired by water (blue), energy (orange), and construction (concrete).
+*/
+
+@layer base {
+  :root {
+    /* Brand Colors - AQUAVOLTE Identity */
+    --aqua-blue: 203 89% 53%;        /* Primary brand blue - water/fluids */
+    --volt-orange: 35 91% 62%;       /* Energy accent - electricity */
+    --concrete-gray: 220 9% 46%;     /* Construction - civil engineering */
+    --steel-blue: 215 28% 17%;       /* Professional dark */
+    --fresh-mint: 164 76% 86%;       /* Success/completion */
+    
+    /* Core System Colors */
+    --background: 0 0% 100%;
+    --foreground: 215 28% 17%;       /* steel-blue for readability */
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+
+    --primary: 203 89% 53%;          /* aqua-blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 96%;        /* Light concrete */
+    --secondary-foreground: 215 28% 17%;
+
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;  /* concrete-gray */
+
+    --accent: 35 91% 62%;            /* volt-orange */
+    --accent-foreground: 0 0% 100%;
+
+    --success: 164 76% 50%;          /* Fresh mint for completed projects */
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 203 89% 53%;             /* aqua-blue focus */
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(203 89% 53%), hsl(35 91% 62%));
+    --gradient-service: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 20% 98%));
+    --gradient-overlay: linear-gradient(135deg, hsl(203 89% 53% / 0.9), hsl(215 28% 17% / 0.8));
+    
+    /* Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(203 89% 53% / 0.15);
+    --shadow-hero: 0 20px 40px -10px hsl(203 89% 53% / 0.25);
+    --shadow-float: 0 8px 30px -8px hsl(220 9% 46% / 0.2);
+    --shadow-glow: 0 0 20px hsl(203 89% 53% / 0.4);
+    --shadow-elegant: 0 10px 30px -10px hsl(203 89% 53% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 28% 17%;           /* steel-blue for dark theme */
+    --foreground: 0 0% 100%;
+
+    --card: 215 28% 17%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 215 28% 17%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 203 89% 53%;              /* aqua-blue remains primary */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 9% 26%;             /* darker concrete */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 9% 26%;
+    --muted-foreground: 220 9% 66%;
+
+    --accent: 35 91% 62%;                /* volt-orange */
+    --accent-foreground: 0 0% 100%;
+
+    --success: 164 76% 50%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 9% 26%;
+    --input: 220 9% 26%;
+    --ring: 203 89% 53%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

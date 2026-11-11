@@ -1,0 +1,11 @@
+# Libraries imported by the notebooks in analytics/notebooks/
+pandas
+numpy
+matplotlib
+seaborn
+missingno
+scipy
+scikit-learn
+python-dateutil
+openpyxl
+jupyter

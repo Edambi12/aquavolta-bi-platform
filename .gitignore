@@ -1,0 +1,70 @@
+# ============================================================================
+# AQUAVOLTA BI Platform - .gitignore
+# This project is built on REAL company financial data. Nothing confidential
+# may ever be committed. When in doubt, do not commit.
+# ============================================================================
+
+# --- Confidential source data (never commit) --------------------------------
+data/
+DataSet/
+DataSet.zip
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+!analytics/sample_data/*.csv
+
+# --- Database dumps containing rows -----------------------------------------
+*.sql
+!database/staging/*_schema.sql
+!database/warehouse/*_schema.sql
+!app/supabase/migrations/*.sql
+*.sql.gz
+*.dump
+*.bak
+
+# --- Power BI files (embed an imported copy of the data model) --------------
+*.pbix
+*.pbit
+*.pbids
+
+# --- Talend workspace artefacts with credentials / machine state ------------
+talend.project
+.metadata/
+*.zip
+*.rar
+*.7z
+
+# --- Secrets ----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials*.json
+
+# --- Node / frontend --------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Python / Jupyter -------------------------------------------------------
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# --- OS / editors -----------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sw?
